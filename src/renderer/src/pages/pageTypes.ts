@@ -1,0 +1,11 @@
+export type PageId =
+  | 'dashboard'
+  | 'snapshots'
+  | 'programs'
+  | 'create-snapshot'
+  | 'dev'
+  | 'files'
+  | 'fonts'
+  | 'startup'
+  | 'history'
+  | 'settings'
