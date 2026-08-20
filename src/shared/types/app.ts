@@ -2,17 +2,23 @@ export type RestoreMethod = 'winget' | 'manual' | 'unknown'
 
 export type ScanItemStatus = 'pending' | 'running' | 'done' | 'failed'
 
+export type WingetResolutionSource = 'path' | 'windowsApps'
+
+export type WingetDetectionSource = 'list' | 'export' | 'list-and-export'
+
 export interface WingetPackage {
   name: string
   packageId: string
   version?: string
   availableVersion?: string
   source?: string
+  detectedBy?: WingetDetectionSource
 }
 
 export interface WingetStatus {
   available: boolean
   version?: string
+  resolvedFrom?: WingetResolutionSource
   error?: string
 }
 
@@ -38,6 +44,8 @@ export interface InstalledApplication {
     packageId: string
     source?: string
     version?: string
+    availableVersion?: string
+    detectedBy?: WingetDetectionSource
   }
   restoreMethod: RestoreMethod
 }

@@ -53,7 +53,9 @@ export class InstalledAppsScanner {
       label: 'Winget',
       status: winget.available ? 'done' : 'failed',
       message: winget.available
-        ? `${wingetPackages.length} pacotes compatíveis`
+        ? `${wingetPackages.length} pacotes compatíveis via ${
+            winget.resolvedFrom === 'windowsApps' ? 'WindowsApps' : 'PATH'
+          }`
         : winget.error || 'Winget indisponível',
     })
 

@@ -7,6 +7,10 @@ const REGISTRY_ROOTS = [
   'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
 ] as const
 
+const UPDATE_NAME_REGEX =
+  /^(security update|update for|hotfix|servicing stack|cumulative update|actualización|atualização)/i
+const WINDOWS_KB_REGEX = /\bKB\d{6,}\b/i
+
 interface RegistryAccumulator {
   registryKey: string
   registryRoot: string
@@ -74,8 +78,9 @@ export class RegistryScanner {
   private toApplication(entry: RegistryAccumulator): RegistryApplication | undefined {
     const name = entry.values.DisplayName
     if (!name) return undefined
-    if (entry.values.SystemComponent === '0x1') return undefined
-    if (entry.values.ReleaseType === 'Update') return undefined
+    if (isTruthyRegistryDword(entry.values.SystemComponent)) return undefined
+    if (entry.values.ParentKeyName && !entry.values.UninstallString) return undefined
+    if (isUpdateEntry(name, entry.values.ReleaseType)) return undefined
 
     return {
       name,
@@ -88,4 +93,14 @@ export class RegistryScanner {
       registryRoot: entry.registryRoot,
     }
   }
+}
+
+function isTruthyRegistryDword(value: string | undefined): boolean {
+  if (!value) return false
+  return ['0x1', '1'].includes(value.trim().toLowerCase())
+}
+
+function isUpdateEntry(name: string, releaseType: string | undefined): boolean {
+  if (releaseType && /update|hotfix|security/i.test(releaseType)) return true
+  return UPDATE_NAME_REGEX.test(name) || WINDOWS_KB_REGEX.test(name)
 }

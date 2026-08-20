@@ -47,7 +47,22 @@ export function AppCard({ app, selected, onToggle }: AppCardProps) {
                 {app.version ? <span>Versão {app.version}</span> : null}
               </div>
               {app.winget ? (
-                <p className="mt-2 font-mono text-xs text-sky-200">{app.winget.packageId}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                  <span className="font-mono text-sky-200">{app.winget.packageId}</span>
+                  {app.winget.source ? (
+                    <span className="text-slate-500">Fonte {app.winget.source}</span>
+                  ) : null}
+                  {app.winget.detectedBy ? (
+                    <span className="text-slate-500">
+                      {formatWingetDetection(app.winget.detectedBy)}
+                    </span>
+                  ) : null}
+                  {app.winget.availableVersion ? (
+                    <span className="text-amber-200">
+                      Atualização {app.winget.availableVersion}
+                    </span>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           </div>
@@ -56,4 +71,11 @@ export function AppCard({ app, selected, onToggle }: AppCardProps) {
       </div>
     </label>
   )
+}
+
+function formatWingetDetection(
+  detectedBy: NonNullable<InstalledApplication['winget']>['detectedBy'],
+) {
+  if (detectedBy === 'list-and-export') return 'list + export'
+  return detectedBy
 }

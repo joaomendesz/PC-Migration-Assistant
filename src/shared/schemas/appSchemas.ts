@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const WingetStatusSchema = z.object({
   available: z.boolean(),
   version: z.string().optional(),
+  resolvedFrom: z.enum(['path', 'windowsApps']).optional(),
   error: z.string().optional(),
 })
 
@@ -18,6 +19,8 @@ export const InstalledApplicationSchema = z.object({
       packageId: z.string().min(1),
       source: z.string().optional(),
       version: z.string().optional(),
+      availableVersion: z.string().optional(),
+      detectedBy: z.enum(['list', 'export', 'list-and-export']).optional(),
     })
     .optional(),
   restoreMethod: z.enum(['winget', 'manual', 'unknown']),

@@ -39,7 +39,7 @@ Este projeto foi pensado como uma aplicação real de portfólio, com foco em ar
 
 **Versão atual:** `0.1.0`
 
-**Fase atual do MVP:** base Electron funcional + interface inicial + scanner real de programas instalados.
+**Fase atual do MVP:** scanner real de programas instalado e UI de inventário em evolução.
 
 O projeto já possui:
 
@@ -47,9 +47,10 @@ O projeto já possui:
 - Interface React com dashboard, sidebar e tela de programas.
 - IPC seguro entre renderer e main process.
 - Scanner real de programas instalados no Windows via Registro.
-- Detecção real do Winget.
-- Parser inicial para saída de `winget list`.
-- Normalização e deduplicação básica de programas.
+- Detecção real do Winget via PATH e alias WindowsApps.
+- Parser para saída de `winget list`.
+- Suporte complementar a `winget export`.
+- Normalização, scoring de match e deduplicação de programas.
 - Testes unitários para partes críticas.
 - Teste de integração opcional para o scanner real.
 - Build de produção.
@@ -143,7 +144,9 @@ O scanner atual combina:
 - Leitura do Registro do Windows.
 - Detecção do Winget.
 - Listagem de pacotes conhecidos pelo Winget, quando disponível.
+- Export de pacotes conhecidos via `winget export`, quando disponível.
 - Normalização de nomes.
+- Matching por score entre Registro, nomes do Winget, Package IDs e publisher.
 - Deduplicação básica.
 - Classificação do método de restauração.
 
@@ -429,13 +432,26 @@ O serviço de Winget tenta executar:
 winget --version
 ```
 
+O serviço tenta resolver o executável em duas fontes:
+
+```text
+winget
+%LOCALAPPDATA%\Microsoft\WindowsApps\winget.exe
+```
+
 Se o Winget estiver disponível, o app tenta listar pacotes instalados:
 
 ```powershell
 winget list --accept-source-agreements --disable-interactivity
 ```
 
-O resultado é usado para relacionar programas instalados a Package IDs do Winget.
+Também tenta complementar o inventário com:
+
+```powershell
+winget export --output winget-export.json --include-versions --accept-source-agreements --disable-interactivity
+```
+
+Os resultados são combinados para relacionar programas instalados a Package IDs do Winget.
 
 Exemplo:
 
@@ -614,6 +630,9 @@ Testes atuais:
 - Normalização de nomes de aplicativos.
 - Deduplicação de programas.
 - Associação com Winget Package ID.
+- Parsing de `winget list`.
+- Parsing de `winget export`.
+- Parsing de Registro do Windows.
 - Validação de Package ID do Winget.
 - Redaction de potenciais secrets.
 - Teste de integração opcional do scanner real.
@@ -833,18 +852,18 @@ Status: implementada.
 
 ### Fase 2: scanner de programas
 
-Status: parcialmente implementada.
+Status: implementada para o MVP atual.
 
 - Detecção do Winget.
 - Scanner de Registro.
 - Normalização.
+- Matching por score.
 - Deduplicação.
 - UI de programas.
+- Testes de parsing e integração opcional.
 
 Próximas melhorias:
 
-- Melhor matching entre Registro e Winget.
-- Suporte a aliases do Winget em cenários onde `winget.exe` não está no PATH.
 - Cache local de ícones.
 - Mais testes com fixtures reais de diferentes máquinas.
 

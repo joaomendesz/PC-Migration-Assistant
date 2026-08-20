@@ -34,4 +34,49 @@ describe('appNormalizer', () => {
     expect(apps[0].winget?.packageId).toBe('Google.Chrome')
     expect(apps[0].restoreMethod).toBe('winget')
   })
+
+  it('matches short registry names when publisher and package tokens agree', () => {
+    const apps = mergeApplications(
+      [
+        {
+          name: 'Chrome',
+          version: '126',
+          publisher: 'Google LLC',
+        },
+      ],
+      [
+        {
+          name: 'Google Chrome',
+          packageId: 'Google.Chrome',
+          version: '126',
+          source: 'winget',
+        },
+      ],
+    )
+
+    expect(apps[0].winget?.packageId).toBe('Google.Chrome')
+  })
+
+  it('does not attach unrelated packages on weak token overlap', () => {
+    const apps = mergeApplications(
+      [
+        {
+          name: 'Python Launcher',
+          publisher: 'Python Software Foundation',
+        },
+      ],
+      [
+        {
+          name: 'Python 3.13',
+          packageId: 'Python.Python.3.13',
+          source: 'winget',
+        },
+      ],
+    )
+
+    const launcher = apps.find((app) => app.name === 'Python Launcher')
+
+    expect(launcher?.winget).toBeUndefined()
+    expect(launcher?.restoreMethod).toBe('manual')
+  })
 })
