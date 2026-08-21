@@ -1,12 +1,22 @@
 import { ipcRenderer } from 'electron'
 import { IPC_CHANNELS, IPC_EVENTS } from '@shared/constants/ipc'
 import { ScanAppsResultSchema, ScanProgressEventSchema } from '@shared/schemas/appSchemas'
+import {
+  CreateSnapshotPayloadSchema,
+  CreateSnapshotResultSchema,
+} from '@shared/schemas/snapshotSchemas'
 import type { PcMigrationApi } from '@shared/types/api'
 
 export const pcMigrationApi: PcMigrationApi = {
   async scanApps() {
     const result = await ipcRenderer.invoke(IPC_CHANNELS.APPS_SCAN, {})
     return ScanAppsResultSchema.parse(result)
+  },
+
+  async createSnapshot(payload) {
+    const safePayload = CreateSnapshotPayloadSchema.parse(payload)
+    const result = await ipcRenderer.invoke(IPC_CHANNELS.SNAPSHOT_CREATE, safePayload)
+    return CreateSnapshotResultSchema.parse(result)
   },
 
   async getSystemInfo() {

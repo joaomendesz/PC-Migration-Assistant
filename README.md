@@ -39,7 +39,7 @@ Este projeto foi pensado como uma aplicação real de portfólio, com foco em ar
 
 **Versão atual:** `0.1.0`
 
-**Fase atual do MVP:** scanner real de programas instalado e UI de inventário em evolução.
+**Fase atual do MVP:** scanner real de programas + criação inicial de snapshot `.pcma`.
 
 O projeto já possui:
 
@@ -51,6 +51,7 @@ O projeto já possui:
 - Parser para saída de `winget list`.
 - Suporte complementar a `winget export`.
 - Normalização, scoring de match e deduplicação de programas.
+- Criação real de snapshot `.pcma` com manifest, JSONs internos e checksums SHA-256.
 - Testes unitários para partes críticas.
 - Teste de integração opcional para o scanner real.
 - Build de produção.
@@ -58,7 +59,6 @@ O projeto já possui:
 
 O projeto ainda não possui:
 
-- Criação real de arquivo `.pcma`.
 - Importação de snapshot.
 - Comparação entre PC antigo e PC atual.
 - Instalação automática via Winget.
@@ -781,19 +781,20 @@ O fluxo funcional atual é:
 7. Exibir programas na interface.
 8. Filtrar por Winget, manual, desconhecido ou selecionados.
 9. Selecionar programas compatíveis.
+10. Criar um arquivo `.pcma` com manifest, dados e checksums.
 ```
 
-O app ainda não grava o arquivo `.pcma` nessa fase.
+O app ainda não importa ou compara snapshots nessa fase.
 
-## Formato planejado do snapshot
+## Formato do snapshot
 
-Extensão planejada:
+Extensão:
 
 ```text
 .pcma
 ```
 
-Internamente, o arquivo poderá ser um ZIP com estrutura semelhante a:
+Internamente, o arquivo é um ZIP com estrutura inicial:
 
 ```text
 snapshot.pcma
@@ -801,18 +802,10 @@ snapshot.pcma
 ├── data/
 │   ├── system.json
 │   ├── applications.json
-│   ├── winget.json
-│   ├── developer.json
-│   ├── vscode.json
-│   ├── fonts.json
-│   ├── startup.json
-│   ├── environment.json
-│   └── folders.json
-├── config/
-└── backup/
+│   └── winget.json
 ```
 
-Manifest planejado:
+Manifest atual:
 
 ```json
 {
@@ -825,12 +818,18 @@ Manifest planejado:
   },
   "contents": {
     "applications": true,
-    "developerEnvironment": true,
-    "vscode": true,
-    "fonts": true,
-    "startup": true,
-    "environment": true,
+    "developerEnvironment": false,
+    "vscode": false,
+    "fonts": false,
+    "startup": false,
+    "environment": false,
     "files": false
+  },
+  "checksums": {
+    "data/system.json": {
+      "sha256": "...",
+      "sizeBytes": 512
+    }
   }
 }
 ```
@@ -869,13 +868,18 @@ Próximas melhorias:
 
 ### Fase 3: snapshots
 
-Status: planejada.
+Status: parcialmente implementada.
 
 - Criar `.pcma`.
 - Gerar `manifest.json`.
 - Gerar `system.json`.
 - Gerar `applications.json`.
+- Gerar `winget.json`.
 - Calcular checksums SHA-256.
+
+Próximas melhorias:
+
+- Validar/importar `.pcma`.
 - Persistir histórico inicial.
 
 ### Fase 4: importação
